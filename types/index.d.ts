@@ -120,10 +120,13 @@ declare type CreateUserParams = {
   };
 
   // declare type IImage = {
+  //   title: string;
+  //   transformationType: string;
   //   publicId: string;
-  //   width: number;
-  //   height: number;
   //   secureURL: string;
+  //   width?: number;
+  //   height?: number;
+
   // }
   
   declare type TransformationFormProps = {

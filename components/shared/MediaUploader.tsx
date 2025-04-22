@@ -28,12 +28,12 @@ const MediaUploader = (props: MediaUploaderProps) => {
       publicId: result?.info?.public_id,
       width: result?.info?.width,
       height: result?.info?.height,
-      secureUrl: result?.info?.secure_url,
+      secureURL: result?.info?.secure_url,
     }));
 
     toast({
       title: 'Image uploaded successfully.',
-      description: 'You can now use this image in your transformations.',
+      description: '1 credit was deducted from your account.',
       duration: 5000,
       className: 'success-toast',
     });

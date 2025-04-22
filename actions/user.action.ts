@@ -1,7 +1,9 @@
+'use server';
+
 import { db } from "@/database/drizzle";
 import { users } from "@/database/schema";
 import { handleError } from "@/lib/utils";
-import { eq, or } from "drizzle-orm";
+import { eq, or, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function createUser(user: CreateUserParams) {
@@ -73,13 +75,17 @@ export async function updateCredits(userId: string, creditFee: number) {
     try {
         const updatedUser = await db
             .update(users)
-            .set({ creditBalance: creditFee })
+            .set({
+                creditBalance: sql`${users.creditBalance} + ${creditFee}`
+            })
             .where(eq(users.clerkId, userId))
             .returning();
 
-        if (!updatedUser) {
+        if (updatedUser.length === 0) {
             throw new Error("User credits update failed");
         }
+
+        console.log("Updated user credits:", updatedUser[0]);
 
         return updatedUser[0]; // Kembalikan user yang diperbarui
 
