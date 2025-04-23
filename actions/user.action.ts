@@ -78,7 +78,7 @@ export async function updateCredits(userId: string, creditFee: number) {
             .set({
                 creditBalance: sql`${users.creditBalance} + ${creditFee}`
             })
-            .where(eq(users.clerkId, userId))
+            .where(eq(users.id, userId))
             .returning();
 
         if (updatedUser.length === 0) {

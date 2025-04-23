@@ -1,13 +1,20 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 'use server';
 
 import { handleError } from '@/lib/utils';
 import { v2 as cloudinary } from 'cloudinary'
-import { eq } from "drizzle-orm";
+import { eq, inArray, desc, sql } from "drizzle-orm";
 import { revalidatePath } from 'next/cache';
 import { db } from "@/database/drizzle";
 import { users, images } from "@/database/schema";
 import { redirect } from 'next/navigation';
+
+interface GetAllImagesParams {
+    limit?: number;
+    page: number;
+    searchQuery?: string;
+}
 
 async function getImageWithUser(imageId: string) {
     const result = await db
@@ -96,3 +103,75 @@ export async function getImageById(imageId: string) {
         handleError(error);
     }
 }
+
+export async function getAllImages(params: GetAllImagesParams) {
+    const { limit = 9, page = 1, searchQuery = '' } = params;
+
+    try {
+        cloudinary.config({
+            cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET,
+            secure: true,
+        });
+
+        let expression = 'folder=imagic_studio'
+
+        if (searchQuery) {
+            expression += ` AND ${searchQuery}`
+        }
+
+        const { resources } = await cloudinary.search
+            .expression(expression)
+            .execute();
+
+        const resourceIds = resources.map((resource: any) => resource.public_id);
+
+        const whereClause = searchQuery
+            ? inArray(images.publicId, resourceIds)
+            : undefined;
+
+        const offset = (Number(page) - 1) * limit;
+
+        const rawData = await db
+            .select({
+                image: images,
+                author: {
+                    id: users.id,
+                    firstName: users.firstName,
+                    lastName: users.lastName,
+                    clerkId: users.clerkId,
+                }
+            })
+            .from(images)
+            .leftJoin(users, eq(images.authorId, users.id))
+            .where(whereClause)
+            .orderBy(desc(images.updatedAt))
+            .limit(limit)
+            .offset(offset);
+
+        const imageData = rawData.map((entry) => ({
+            ...entry.image,
+            author: entry.author ?? undefined,
+        }));
+
+        const [{ count: totalImages }] = await db
+            .select({ count: sql<number>`COUNT(*)` })
+            .from(images)
+            .where(whereClause ?? sql`TRUE`);
+
+        const [{ count: savedImages }] = await db
+            .select({ count: sql<number>`COUNT(*)` })
+            .from(images);
+
+        return {
+            data: imageData,
+            totalPage: Math.ceil(Number(totalImages) / limit),
+            savedImages: Number(savedImages),
+        };
+
+    } catch (error) {
+        handleError(error);
+    }
+}
+

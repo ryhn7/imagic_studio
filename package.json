@@ -23,6 +23,7 @@
     "@radix-ui/react-toast": "^1.2.10",
     "@types/qs": "^6.9.18",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.6.0",
     "clsx": "^2.1.1",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.42.0",

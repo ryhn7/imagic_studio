@@ -121,10 +121,10 @@ const TransformationForm = (props: TransformationFormProps) => {
           const updatedImage = await updateImage({
             image: {
               ...imageData,
-              _id: data.id,
+              _id: data?.id ?? '',
             },
             userId,
-            path: `transformations/${data.id}`,
+            path: `transformations/${data?.id}`,
           });
 
           if (updatedImage) {

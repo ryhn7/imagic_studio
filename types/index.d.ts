@@ -119,15 +119,30 @@ declare type CreateUserParams = {
     searchParams: { [key: string]: string | string[] | undefined };
   };
 
-  // declare type IImage = {
-  //   title: string;
-  //   transformationType: string;
-  //   publicId: string;
-  //   secureURL: string;
-  //   width?: number;
-  //   height?: number;
-
-  // }
+  declare type IImage = {
+    id: string; // uuid
+    title: string;
+    transformationType: string;
+    publicId: string;
+    secureURL: string;
+    width?: number 
+    height?: number;
+    config?: any; // bisa diketik lebih detail jika perlu
+    transformationUrl?: string;
+    aspectRatio?: string;
+    color?: string;
+    prompt?: string;
+    authorId: string; // foreign key (uuid)
+    author?: {
+      id: string;
+      username: string;
+      firstName?: string;
+      lastName?: string;
+    };
+    createdAt?: Date;
+    updatedAt?: Date;
+  };
+  
   
   declare type TransformationFormProps = {
     action: "Add" | "Update";

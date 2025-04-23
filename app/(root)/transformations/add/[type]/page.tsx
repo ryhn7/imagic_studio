@@ -5,11 +5,10 @@ import { transformationTypes } from '@/constants';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 
-const AddTransformationTypePage = async ({
-  params: { type },
-}: SearchParamProps) => {
+const AddTransformationTypePage = async (props: SearchParamProps) => {
+  const { params } = props;
   const { userId } = await auth();
-  const transformation = transformationTypes[type];
+  const transformation = transformationTypes[params.type];
 
   if (!userId) redirect('/sign-in');
 
