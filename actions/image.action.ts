@@ -16,12 +16,17 @@ interface GetAllImagesParams {
     searchQuery?: string;
 }
 
+interface GetUserImagesParams extends GetAllImagesParams {
+    userId: string;
+}
+
 async function getImageWithUser(imageId: string) {
     const result = await db
         .select({
             image: images,
             author: {
                 id: users.id,
+                userName: users.username,
                 firstName: users.firstName,
                 lastName: users.lastName,
                 clerkId: users.clerkId,
@@ -138,6 +143,7 @@ export async function getAllImages(params: GetAllImagesParams) {
                 image: images,
                 author: {
                     id: users.id,
+                    userName: users.username,
                     firstName: users.firstName,
                     lastName: users.lastName,
                     clerkId: users.clerkId,
@@ -168,6 +174,52 @@ export async function getAllImages(params: GetAllImagesParams) {
             data: imageData,
             totalPage: Math.ceil(Number(totalImages) / limit),
             savedImages: Number(savedImages),
+        };
+
+    } catch (error) {
+        handleError(error);
+    }
+}
+
+export async function getUserImages(params: GetUserImagesParams) {
+    const { limit = 9, page = 1, userId } = params;
+
+    try {
+
+
+        const offset = (Number(page) - 1) * limit;
+
+        const rawData = await db
+            .select({
+                image: images,
+                author: {
+                    id: users.id,
+                    userName: users.username,
+                    firstName: users.firstName,
+                    lastName: users.lastName,
+                    clerkId: users.clerkId,
+                }
+            })
+            .from(images)
+            .leftJoin(users, eq(images.authorId, users.id))
+            .where(eq(images.authorId, userId)) 
+            .orderBy(desc(images.updatedAt))
+            .limit(limit)
+            .offset(offset);
+
+        const imageData = rawData.map((entry) => ({
+            ...entry.image,
+            author: entry.author ?? undefined,
+        }));
+
+        const [{ count: totalImages }] = await db
+            .select({ count: sql<number>`COUNT(*)` })
+            .from(images)
+            .where(eq(images.authorId, userId));
+
+        return {
+            data: imageData,
+            totalPage: Math.ceil(Number(totalImages) / limit),
         };
 
     } catch (error) {

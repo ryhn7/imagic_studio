@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
@@ -53,7 +54,7 @@ const TransformationForm = (props: TransformationFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTransforming, setIsTransforming] = useState(false);
   const [transformationConfig, setTransformationConfig] = useState(config);
-  const [isPending, startTransition] = useTransition();
+  const [_isPending, startTransition] = useTransition();
 
   const initialValues =
     data && action === 'Update'
@@ -80,18 +81,18 @@ const TransformationForm = (props: TransformationFormProps) => {
       const transformationUrl = getCldImageUrl({
         width: image?.width,
         height: image?.height,
-        src: image?.publicId,
+        src: image?.publicId ?? '',
         ...transformationConfig,
       });
 
       const imageData = {
         title: values.title,
-        publicId: image?.publicId,
+        publicId: image?.publicId ?? '',
         transformationType: type,
-        width: image?.width,
-        height: image?.height,
+        width: image?.width ?? 0,
+        height: image?.height ?? 0,
         config: transformationConfig,
-        secureURL: image?.secureURL,
+        secureURL: image?.secureURL ?? '',
         transformationURL: transformationUrl,
         aspectRatio: values.aspectRatio,
         prompt: values.prompt,
@@ -171,9 +172,9 @@ const TransformationForm = (props: TransformationFormProps) => {
           [fieldName === 'prompt' ? 'prompt' : 'to']: value,
         },
       }));
+    }, 1000)();
 
-      return onChangeField(value);
-    }, 1000);
+    return onChangeField(value);
   };
 
   const onTransformHandler = async () => {
@@ -219,6 +220,7 @@ const TransformationForm = (props: TransformationFormProps) => {
                 onValueChange={(value) =>
                   onSelectFieldHandler(value, field.onChange)
                 }
+                value={field.value}
               >
                 <SelectTrigger className="select-field">
                   <SelectValue placeholder="Select size" />

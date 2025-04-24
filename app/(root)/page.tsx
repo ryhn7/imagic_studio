@@ -11,6 +11,29 @@ const Home = async ({ searchParams }: SearchParamProps) => {
 
   const images = await getAllImages({ page, searchQuery });
 
+  const transformedImages = images?.data.map((image) => ({
+    ...image,
+    publicId: image.publicId || '',
+    width: image.width ?? undefined, // Replace null with undefined
+    height: image.height ?? undefined, // Replace null with undefined
+    secureURL: image.secureURL || '',
+    transformationUrl: image.transformationUrl ?? undefined, // Replace null with undefined
+    aspectRatio: image.aspectRatio ?? undefined, // Replace null with undefined
+    color: image.color ?? undefined, // Replace null with undefined
+    prompt: image.prompt ?? undefined, // Replace null with undefined
+    author: image.author
+      ? {
+          id: image.author.id,
+          username: image.author.userName || 'Unknown', // Add a default username
+          firstName: image.author.firstName ?? undefined,
+          lastName: image.author.lastName ?? undefined,
+        }
+      : undefined,
+    authorId: image.authorId || '',
+    createdAt: image.createdAt || new Date(),
+    updatedAt: image.updatedAt || new Date(),
+  }));
+
   return (
     <>
       <section className="home">
@@ -36,7 +59,7 @@ const Home = async ({ searchParams }: SearchParamProps) => {
       <section className="sm:mt-12">
         <Collection
           hasSearch={true}
-          images={images?.data || []}
+          images={transformedImages || []}
           totalPages={images?.totalPage || 1}
           page={page}
         />
